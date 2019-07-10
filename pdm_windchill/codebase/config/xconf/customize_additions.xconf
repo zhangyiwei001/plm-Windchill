@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Configuration  SYSTEM "xconf.dtd">
+<Configuration targetFile="codebase/config/xconf/customize_additions.properties">
+	
+	<AddToProperty name="wt.services.applicationcontext.WTServiceProviderFromProperties.customPropertyFiles" value="config/xconf/customize_additions.properties" />
+
+	<Service context="default" name="com.ptc.core.components.descriptor.DataUtility">
+		<Option serviceClass="com.aac.pm.datautilities.CusPROPLDataUtility" selector="CusPROPLDataUtility" requestor="java.lang.Object" cardinality="duplicate" />
+	</Service>
+
+    <Service context="default" name="com.ptc.core.ui.validation.SimpleValidationFilter">	
+		<Option serviceClass="com.aac.ae.validator.ReviesFilter" requestor="null" selector="ReviesFilter" cardinality="duplicate" />
+	</Service>
+
+</Configuration>
