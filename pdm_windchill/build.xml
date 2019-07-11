@@ -1,0 +1,232 @@
+<project name="Windchill_platform_client" basedir="." default="deploy_jar_to_windchill">
+
+	<!-- 配置开始 -->
+	<property name="project.version" value="1.0" />
+	<property name="windchill.jar.file.prefix" value="caic-pdm" />
+
+	<property name="project.dir" location="." />
+	<property name="src.java.dir" location="${project.dir}/src" />
+	<property name="build.dir" location="${project.dir}/build" />
+	<property name="build.classes.dir" location="${build.dir}/classes" />
+	<property name="build.jar.dir" location="${build.dir}/jar" />
+	<property name="src.lib.dir" location="${project.dir}/codebase/WEB-INF/lib" />
+	<property name="ext.lib.dir" location="编译jar包存放地" />
+
+	<property name="windchill.dir" location="${project.dir}/Windchill" />
+	<property name="codebase.dir" location="${windchill.dir}/codebase" />
+	<property name="netmarkets.dir" location="${codebase.dir}/netmarkets" />
+	<property name="jsp.dir" location="${netmarkets.dir}/jsp" />
+	<property name="javascript.dir" location="${netmarkets.dir}/javascript" />
+	<property name="css.dir" location="${netmarkets.dir}/css" />
+	<property name="webinf.dir" location="${codebase.dir}/WEB-INF" />
+	<property name="webinf.lib.dir" location="${webinf.dir}/lib" />
+	<property name="loadFiles.dir" location="${windchill.dir}/loadFiles" />
+	<property name="db.dir" location="${windchill.dir}/db" />
+	<property name="tomcat.dir" location="${windchill.dir}/tomcat" />
+	<property name="wtCustom.dir" location="${windchill.dir}/wtCustom" />
+	<property name="loadXMLFiles.dir" location="${windchill.dir}/loadXMLFiles" />
+
+	<property name="windchill.root.dir" location="虚拟机Windchill目录" />
+	<property name="windchill.codebase.dir" location="${windchill.root.dir}/codebase" />
+	<property name="windchill.wtCustom.dir" location="${windchill.root.dir}/wtCustom" />
+	<property name="windchill.src.dir" location="${windchill.root.dir}/src" />
+	<property name="windchill.netmarkets.dir" location="${windchill.codebase.dir}/netmarkets" />
+	<property name="windchill.jsp.dir" location="${windchill.netmarkets.dir}/jsp" />
+	<property name="windchill.javascript.dir" location="${windchill.netmarkets.dir}/javascript" />
+	<property name="windchill.css.dir" location="${windchill.netmarkets.dir}/css" />
+	<property name="windchill.tasks.dir" location="${windchill.root.dir}/tasks" />
+	<property name="windchill.webinf.dir" location="${windchill.codebase.dir}/WEB-INF" />
+	<property name="windchill.webinf.jsp.dir" location="${windchill.webinf.dir}/jsp" />
+	<property name="windchill.webinf.lib.dir" location="${windchill.webinf.dir}/lib" />
+	<property name="windchill.loadFiles.dir" location="${windchill.root.dir}/loadFiles" />
+	<property name="windchill.loadXMLFiles.dir" location="${windchill.root.dir}/loadXMLFiles" />
+	<property name="windchill.db.dir" location="${windchill.root.dir}/db" />
+	<property name="windchill.tomcat.dir" location="${windchill.root.dir}/tomcat" />
+
+	<path id="classpath.commpile.java">
+		<pathelement location="${build.classes.dir}" />
+		<path refid="jars.lib" />
+	</path>
+
+	<path id="jars.lib">
+		<!--fileset dir="${src.lib.dir}">
+			<include name="*.jar" />
+			<include name="*/*.jar" />
+			<include name="*/*/*.jar" />
+		</fileset-->
+		<fileset dir="${ext.lib.dir}">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+	<!-- 配置结束-->
+
+
+	<!-- ============================================= compile java code  ==========================================-->
+
+	<target name="make_build_classes_path">
+		<mkdir dir="${build.classes.dir}" />
+	</target>
+
+	<target name="clean_build_classes_for_compile" depends="make_build_classes_path">
+		<delete includeemptydirs="true">
+			<fileset dir="${build.classes.dir}" includes="**/*" />
+		</delete>
+	</target>
+
+	<target name="compile_java_code" depends="clean_build_classes_for_compile">
+		<javac srcdir="${src.java.dir}" destdir="${build.classes.dir}" encoding="UTF-8" source="1.7" target="1.7" verbose="false" includeantruntime="true" debug="true">
+			<classpath refid="classpath.commpile.java" />
+		</javac>
+	</target>
+
+	<!-- ============================================= compile java code  ==========================================-->
+
+
+	<!-- ======================================= Deploy java code using jar file  ====================================-->
+
+	<target name="make_build_jar_path">
+		<mkdir dir="${build.jar.dir}" />
+	</target>
+
+	<target name="clean_build_jar_path" depends="make_build_jar_path">
+		<delete includeemptydirs="true">
+			<fileset dir="${build.jar.dir}" includes="**/*.jar" />
+		</delete>
+	</target>
+
+	<target name="make_jar_file" depends="clean_build_jar_path,clean_build_classes_for_compile,compile_java_code">
+		<tstamp>
+			<format property="current.date.time1" pattern="yyyyMMdd_HHmmss" />
+			<format property="current.date.time2" pattern="yyyy-MM-dd HH24:mm:ss" />
+		</tstamp>
+		<jar destfile="${build.jar.dir}/${windchill.jar.file.prefix}-${current.date.time1}.jar">
+			<fileset dir="${build.classes.dir}">
+				<include name="**" />
+			</fileset>
+			<manifest>
+				<attribute name="Windchill-Version" value="${project.version}" />
+				<attribute name="Build-Timestamp" value="${current.date.time2}" />
+				<attribute name="Author" value="wang tong, 291417619@qq.com" />
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="delete_jar_from_rdm_plugins">
+		<delete includeemptydirs="false" verbose="true">
+			<fileset dir="${windchill.webinf.lib.dir}" includes="${windchill.jar.file.prefix}-*.jar" />
+		</delete>
+	</target>
+
+	<!-- 将代码以Jar文件的方式部署到WEB-INF/lib文件夹下 -->
+	<target name="deploy_jar_to_windchill" depends="clean_build_jar_path,make_jar_file,delete_jar_from_rdm_plugins,copy_resource_to_windchill_codebase">
+		<copy todir="${windchill.webinf.lib.dir}" overwrite="true" verbose="true">
+			<fileset dir="${build.jar.dir}">
+				<include name="${windchill.jar.file.prefix}-*.jar" />
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- 将资源文件部署到Windchill/codebase下 -->
+	<target name="deploy_web_resources_to_windchill">
+		<copy todir="${windchill.jsp.dir}" overwrite="false" includeemptydirs="false" verbose="true" description="copy jsp files">
+			<fileset dir="${jsp.dir}">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		<!--
+		<copy todir="${windchill.css.dir}" overwrite="false" includeemptydirs="false" verbose="true" description="copy css files">
+			<fileset dir="${css.dir}">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		<copy todir="${windchill.javascript.dir}" overwrite="false" includeemptydirs="false" verbose="true" description="copy javascript files">
+			<fileset dir="${javascript.dir}">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		<copy todir="${windchill.webinf.dir}" overwrite="false" includeemptydirs="false" verbose="true" description="copy files in WEB-INF">
+			<fileset dir="${webinf.dir}">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		-->
+		<copy todir="${windchill.codebase.dir}/config" includeEmptyDirs="false" overwrite="true" verbose="true">
+			<fileset dir="${codebase.dir}/config">
+				<exclude name="**/*.java" />
+				<exclude name="**/*.txt" />
+				<exclude name="**/*.sql" />
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- 将资源文件部署到Windchill下 -->
+	<target name="copy_resource_to_windchill_codebase">
+		<copy todir="${windchill.codebase.dir}" includeEmptyDirs="false" overwrite="true" verbose="true">
+			<fileset dir="${src.java.dir}">
+				<exclude name="**/*.java" />
+				<exclude name="**/*.txt" />
+				<exclude name="**/*.sql" />
+			</fileset>
+		</copy>
+		<copy todir="${windchill.codebase.dir}/" includeEmptyDirs="false" overwrite="true" verbose="true">
+			<fileset dir="${codebase.dir}/">
+				<include name="*.xml" />
+				<include name="*.properties" />
+			</fileset>
+		</copy>
+		<copy todir="${windchill.codebase.dir}/config" includeEmptyDirs="false" overwrite="true" verbose="true">
+			<fileset dir="${codebase.dir}/config">
+				<exclude name="**/*.java" />
+				<exclude name="**/*.txt" />
+				<exclude name="**/*.sql" />
+			</fileset>
+		</copy>
+		<!--
+		<copy todir="${windchill.codebase.dir}/com" includeEmptyDirs="false" overwrite="true" verbose="true">
+			<fileset dir="${codebase.dir}/com">
+				<exclude name="**/*.java" />
+				<exclude name="**/*.txt" />
+				<exclude name="**/*.sql" />
+			</fileset>
+		</copy>
+		<copy todir="${windchill.codebase.dir}/ext" includeEmptyDirs="false" overwrite="true" verbose="true">
+			<fileset dir="${codebase.dir}/ext">
+				<exclude name="**/*.java" />
+				<exclude name="**/*.txt" />
+				<exclude name="**/*.sql" />
+			</fileset>
+		</copy>
+		<copy todir="${windchill.wtCustom.dir}" includeEmptyDirs="false" overwrite="true" verbose="true">
+			<fileset dir="${wtCustom.dir}">
+				<exclude name="**/*.java" />
+				<exclude name="**/*.txt" />
+				<exclude name="**/*.sql" />
+			</fileset>
+		</copy>
+		<copy todir="${windchill.db.dir}" includeEmptyDirs="false" overwrite="true" verbose="true">
+			<fileset dir="${db.dir}">
+			</fileset>
+		</copy>
+		<copy todir="${windchill.tomcat.dir}" includeEmptyDirs="false" overwrite="true" verbose="true">
+			<fileset dir="${tomcat.dir}">
+			</fileset>
+		</copy>
+		<antcall target="deploy_load_files_to_windchill"/>
+		-->
+	</target>
+
+	<!-- 将资源文件部署到导入文件Windchill下 -->
+	<target name="deploy_load_files_to_windchill">
+		<copy todir="${windchill.loadFiles.dir}" overwrite="false" includeemptydirs="false" verbose="true" description="copy loadFiles">
+			<fileset dir="${loadFiles.dir}">
+			</fileset>
+		</copy>
+		<copy todir="${windchill.loadXMLFiles.dir}" overwrite="false" includeemptydirs="false" verbose="true" description="copy loadXMLFiles">
+			<fileset dir="${loadXMLFiles.dir}">
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- ======================================= Deploy java code using jar file  ====================================-->
+
+</project>
